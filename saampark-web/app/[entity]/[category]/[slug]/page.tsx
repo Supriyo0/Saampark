@@ -4,15 +4,16 @@ import { allServices } from '@/lib/data/services';
 import { ServiceDetail } from '@/components/features/ServiceDetail/ServiceDetail';
 
 interface Props {
-  params: {
+  params: Promise<{
     entity: string;
     category: string;
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const currentPath = `/${params.entity}/${params.category}/${params.slug}`;
+  const resolvedParams = await params;
+  const currentPath = `/${resolvedParams.entity}/${resolvedParams.category}/${resolvedParams.slug}`;
   const service = allServices.find(s => s.href === currentPath);
   
   if (!service) return { title: 'Service Not Found' };
@@ -23,8 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ServicePage({ params }: Props) {
-  const currentPath = `/${params.entity}/${params.category}/${params.slug}`;
+export default async function ServicePage({ params }: Props) {
+  const resolvedParams = await params;
+  const currentPath = `/${resolvedParams.entity}/${resolvedParams.category}/${resolvedParams.slug}`;
   const service = allServices.find(s => s.href === currentPath);
 
   if (!service) {

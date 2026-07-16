@@ -281,3 +281,98 @@
   .stickyActions { width: 100%; justify-content: flex-end; }
   .stickyActions .btn-primary { flex: 1; justify-content: center; }
 }
+
+/* ── Portfolio Section ── */
+.portfolioSection {
+  margin-top: var(--size-16);
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--size-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-6);
+}
+
+.portfolioHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.portfolioTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.portfolioDesc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  max-width: 800px;
+  margin: 0;
+}
+
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--size-4);
+  margin-top: var(--size-2);
+}
+
+@media (max-width: 1200px) {
+  .portfolioGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .portfolioGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .portfolioGrid { grid-template-columns: 1fr; }
+}
+
+.portfolioItem {
+  position: relative;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-default);
+  overflow: hidden;
+  background: var(--color-bg-sunken);
+  aspect-ratio: 1.6;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-fast);
+}
+
+.portfolioItem:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-brand);
+  box-shadow: var(--shadow-md);
+}
+
+.portfolioImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-normal);
+}
+
+.portfolioItem:hover .portfolioImg {
+  transform: scale(1.05);
+}
+
+.portfolioBadge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(13, 27, 42, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

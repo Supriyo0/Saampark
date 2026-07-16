@@ -779,18 +779,42 @@ export const scsServices: Service[] = [
 // ─────────────────────────────────────────
 export const allServices: Service[] = [...strServices, ...scsServices].map(s => {
   let image = '/assets/images/website-dev.jpg'; // default website
-  if (s.category === 'app') {
-    image = '/assets/images/app-dev.jpg';
-  } else if (s.category === 'software') {
-    image = '/assets/images/software-erp.jpg';
-  } else if (s.category === 'specialized-website') {
-    image = '/assets/images/specialized-web.jpg';
-  } else if (['social-media', 'meta-ads', 'google-ads', 'google-business'].includes(s.category)) {
-    image = '/assets/images/digital-marketing.jpg';
-  } else if (s.category === 'video-ai') {
-    image = '/assets/images/ai-video.jpg';
-  } else if (s.category === 'business-legal') {
-    image = '/assets/images/business-legal.jpg';
+  
+  if (s.id === 'str-web-onepage') {
+    image = '/assets/images/one-page-web.png';
+  } else if (s.id === 'str-web-static') {
+    image = '/assets/images/static-web.png';
+  } else if (s.id === 'str-web-dynamic') {
+    image = '/assets/images/dynamic-web.png';
+  } else if (s.id === 'str-web-ecommerce') {
+    image = '/assets/images/ecommerce-web.png';
+  } else if (s.id === 'str-app-android') {
+    image = '/assets/images/android-app.png';
+  } else if (s.id === 'str-app-ios' || s.id === 'str-app-hybrid') {
+    image = '/assets/images/ios-app.png';
+  } else if (s.id === 'str-spec-erp' || s.id === 'str-spec-crm' || s.id === 'str-spec-school' || s.id === 'str-spec-hotel' || s.id === 'str-spec-hospital') {
+    image = '/assets/images/erp-software.png';
+  } else if (s.id.startsWith('scs-meta-')) {
+    image = '/assets/images/meta-ads.png';
+  } else if (s.id.startsWith('scs-google-')) {
+    image = '/assets/images/google-ads.png';
+  } else if (s.id === 'scs-legal-gst') {
+    image = '/assets/images/gst-reg.png';
+  } else {
+    // Fallbacks
+    if (s.category === 'app') {
+      image = '/assets/images/app-dev.jpg';
+    } else if (s.category === 'software') {
+      image = '/assets/images/software-erp.jpg';
+    } else if (s.category === 'specialized-website') {
+      image = '/assets/images/specialized-web.jpg';
+    } else if (['social-media', 'google-business'].includes(s.category)) {
+      image = '/assets/images/digital-marketing.jpg';
+    } else if (s.category === 'video-ai') {
+      image = '/assets/images/ai-video.jpg';
+    } else if (s.category === 'business-legal') {
+      image = '/assets/images/business-legal.jpg';
+    }
   }
   return { ...s, image };
 });

@@ -12,6 +12,7 @@ import {
 import { CONTACT } from '@/lib/data/services';
 import { useCommerceStore } from '@/lib/store/cartStore';
 import { useUIStore } from '@/lib/store/uiStore';
+import { useAuthStore } from '@/lib/store/authStore';
 import styles from './Navbar.module.css';
 
 // ── Nav Link Data ──────────────────────────────────
@@ -74,6 +75,7 @@ function NavbarContent() {
 
   const { cart, wishlistIds } = useCommerceStore();
   const { openCart, openWishlist } = useUIStore();
+  const { user, logout, openAuthModal } = useAuthStore();
 
   // Scroll detection
   useEffect(() => {
@@ -191,45 +193,35 @@ function NavbarContent() {
                     <div className={styles.avatarBox}>
                       <User size={20} className={styles.avatarIcon} />
                     </div>
-                    <div>
-                      <div className={styles.userTitle}>Guest Session</div>
-                      <div className={styles.userRole}>Saampark Client</div>
+                    <div style={{ flex: 1 }}>
+                      <div className={styles.userTitle}>{user ? user.name : 'Guest Session'}</div>
+                      <div className={styles.userRole}>{user ? user.email : 'Saampark Client'}</div>
                     </div>
+                    {user ? (
+                      <button 
+                        onClick={() => { logout(); setProfileOpen(false); }} 
+                        className={styles.logoutBtn}
+                      >
+                        Logout
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => { openAuthModal(); setProfileOpen(false); }} 
+                        className={styles.loginBtn}
+                      >
+                        Sign In
+                      </button>
+                    )}
                   </div>
 
                   {/* Dropdown Grid */}
                   <div className={styles.dropdownGrid}>
                     
-                    {/* Left Column: Services */}
+                    {/* Left Column: E-Commerce Session */}
                     <div className={styles.dropdownCol}>
-                      <div className={styles.colTitle}>Technology (STR)</div>
-                      <Link href="/technology/web-development/ecommerce-website" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
-                        🌐 Website Engineering
-                      </Link>
-                      <Link href="/technology/app-development/hybrid" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
-                        📱 Mobile Applications
-                      </Link>
-                      <Link href="/technology/software/erp" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
-                        ⚙️ ERP & CRM Software
-                      </Link>
-                      
-                      <div className={styles.colTitle} style={{ marginTop: 12 }}>Consultancy (SCS)</div>
-                      <Link href="/consultancy/digital-marketing/social-media" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
-                        📣 Marketing & Campaigns
-                      </Link>
-                      <Link href="/consultancy/ads-management/meta-ads" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
-                        📢 Managed Meta & Google Ads
-                      </Link>
-                      <Link href="/consultancy/business-legal/gst-registration" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
-                        📋 Business Registrations
-                      </Link>
-                    </div>
-
-                    {/* Right Column: Account Pages */}
-                    <div className={styles.dropdownCol} style={{ borderLeft: '1px solid var(--color-border-default)' }}>
-                      <div className={styles.colTitle}>General Store</div>
+                      <div className={styles.colTitle}>Account & Activity</div>
                       <Link href="/" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
-                        🛒 Storefront Home
+                        🛍️ Active Orders
                       </Link>
                       <button 
                         className={styles.dropLinkBtn} 
@@ -237,25 +229,44 @@ function NavbarContent() {
                       >
                         ❤️ Saved Wishlist ({wishlistIds.length})
                       </button>
+                      <Link href="/" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
+                        🔄 Compare History
+                      </Link>
                       
-                      <div className={styles.colTitle} style={{ marginTop: 12 }}>Corporate</div>
+                      <div className={styles.colTitle} style={{ marginTop: 16 }}>Services Portal</div>
+                      <Link href="/" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
+                        ⚡ Subscribed Plans
+                      </Link>
+                      <Link href="/contact" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
+                        💰 Custom Quote Request
+                      </Link>
+                    </div>
+
+                    {/* Right Column: Corporate & Support */}
+                    <div className={styles.dropdownCol} style={{ borderLeft: '1px solid var(--color-border-default)', paddingLeft: 'var(--size-4)' }}>
+                      <div className={styles.colTitle}>Corporate Office</div>
                       <Link href="/about" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
                         🏢 About Saampark Group
                       </Link>
                       <Link href="/contact" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
-                        📞 Contact & Support
+                        📞 Customer Helpdesk
+                      </Link>
+                      <Link href="/about" className={styles.dropLink} onClick={() => setProfileOpen(false)}>
+                        🛡️ ISO Certification Info
                       </Link>
 
                       <div className={styles.waCard}>
-                        <MessageCircle size={14} /> Direct Support:
+                        <MessageCircle size={14} /> Quick WhatsApp support:
                         <a href={CONTACT.str.whatsapp1} target="_blank" rel="noopener noreferrer" className={styles.waLink}>
-                          WhatsApp STR
+                          STR Tech: {CONTACT.str.phone1}
+                        </a>
+                        <a href={CONTACT.scs.whatsapp} target="_blank" rel="noopener noreferrer" className={styles.waLink} style={{ color: '#4CAF50' }}>
+                          SCS Consult: {CONTACT.scs.phone}
                         </a>
                       </div>
                     </div>
 
                   </div>
-
                 </div>
               )}
             </div>

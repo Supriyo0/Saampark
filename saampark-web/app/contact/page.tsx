@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Phone, Mail, MapPin, Clock, MessageCircle } from 'lucide-react';
 import { CONTACT } from '@/lib/data/services';
-import { ContactForm } from '@/components/features/ContactForm/ContactForm';
+import { ContactSection } from '@/components/features/ContactSection/ContactSection';
 
 export const metadata: Metadata = {
   title: 'Contact Us | Free Consultation',
@@ -16,7 +16,7 @@ export default function ContactPage() {
         <div className="container" style={{ textAlign: 'center' }}>
           <h1 className="text-display-lg" style={{ marginBottom: 16 }}>Let's Build Something Great</h1>
           <p className="text-body-lg" style={{ color: 'rgba(255,255,255,0.7)', maxWidth: 600, margin: '0 auto' }}>
-            Book a free consultation with our experts. Whether you need technology solutions or digital marketing, we are here to help.
+            Book a free consultation with our experts. Calculate project costs or send us a message.
           </p>
         </div>
       </section>
@@ -27,7 +27,7 @@ export default function ContactPage() {
           
           {/* Form Side */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--size-8)' }}>
-            <ContactForm />
+            <ContactSection />
           </div>
 
           {/* Info Side */}

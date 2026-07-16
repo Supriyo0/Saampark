@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar/Navbar';
 import { Footer } from '@/components/layout/Footer/Footer';
+import { AIConsultant } from '@/components/features/AIConsultant/AIConsultant';
+import { AuthModal } from '@/components/features/AuthModal/AuthModal';
 import { RootWrapper } from './RootWrapper';
 
 export const metadata: Metadata = {
@@ -65,6 +67,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           <main>{children}</main>
           <Footer />
+          <AIConsultant />
+          <AuthModal />
         </RootWrapper>
       </body>
     </html>

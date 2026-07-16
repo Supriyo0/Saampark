@@ -5,13 +5,8 @@ import { SplashScreen } from '@/components/features/SplashScreen/SplashScreen';
 import { CommerceDrawers } from '@/components/layout/CommerceDrawers/CommerceDrawers';
 
 export function RootWrapper({ children }: { children: React.ReactNode }) {
-  const [showSplash, setShowSplash] = useState(false);
-  const [appReady,  setAppReady]   = useState(true);
-
-  useEffect(() => {
-    // Keep session storage flag just in case
-    sessionStorage.setItem('saampark-splash', '1');
-  }, []);
+  const [showSplash, setShowSplash] = useState(true);
+  const [appReady,  setAppReady]   = useState(false);
 
   const handleSplashComplete = () => {
     setShowSplash(false);
