@@ -9,129 +9,170 @@ interface Props {
 
 export function SplashScreen({ onComplete }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [phase, setPhase] = useState<'particles' | 'logo' | 'text' | 'done'>('particles');
-  const animRef = useRef<number | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [isFading, setIsFading] = useState(false);
 
   useEffect(() => {
+    // ── 1. Interactive Ambient Canvas Setup ────────────────────────
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
+    let animId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
 
-    const CX = canvas.width / 2;
-    const CY = canvas.height / 2;
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
 
-    // ── Particle System ────────────────────────
-    const PARTICLE_COUNT = 180;
-    interface Particle {
-      x: number; y: number;
-      tx: number; ty: number; // target
-      vx: number; vy: number;
-      size: number;
-      alpha: number;
-      color: string;
-      gathered: boolean;
-    }
+    // Floating Particles Node Network
+    const NODE_COUNT = 45;
+    const nodes = Array.from({ length: NODE_COUNT }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      radius: Math.random() * 2 + 1,
+      alpha: Math.random() * 0.5 + 0.2,
+    }));
 
-    const colors = ['#00B4A6', '#00D4C8', '#33C9BF', '#007A74', '#FFFFFF', '#99DFD9'];
-    const particles: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => {
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 200 + Math.random() * 300;
-      return {
-        x:  CX + Math.cos(angle) * radius,
-        y:  CY + Math.sin(angle) * radius,
-        tx: CX + (Math.random() - 0.5) * 100,
-        ty: CY + (Math.random() - 0.5) * 100,
-        vx: 0, vy: 0,
-        size:  1 + Math.random() * 2.5,
-        alpha: 0.2 + Math.random() * 0.8,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        gathered: false,
-      };
-    });
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
 
-    let startTime = performance.now();
-    const GATHER_DURATION = 900;   // ms to gather
-    const LOGO_SHOW_AT   = 1000;
-    const TEXT_SHOW_AT   = 1500;
-    const FADE_AT        = 2000;
-    const END_AT         = 2600;
+      // Deep obsidian navy background
+      ctx.fillStyle = '#060B13';
+      ctx.fillRect(0, 0, width, height);
 
-    const render = (now: number) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const elapsed = now - startTime;
+      // Render ambient radial glow at center
+      const cx = width / 2;
+      const cy = height / 2;
+      const glowGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(width, height) * 0.45);
+      glowGrad.addColorStop(0, 'rgba(0, 180, 166, 0.18)');
+      glowGrad.addColorStop(0.5, 'rgba(0, 212, 200, 0.05)');
+      glowGrad.addColorStop(1, 'rgba(6, 11, 19, 0)');
+      ctx.fillStyle = glowGrad;
+      ctx.fillRect(0, 0, width, height);
 
-      // Background
-      ctx.fillStyle = '#0D1B2A';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Update & Draw Nodes
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        n.x += n.vx;
+        n.y += n.vy;
 
-      // Subtle radial glow
-      const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, 250);
-      grad.addColorStop(0, 'rgba(0,180,166,0.15)');
-      grad.addColorStop(1, 'transparent');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (n.x < 0 || n.x > width) n.vx *= -1;
+        if (n.y < 0 || n.y > height) n.vy *= -1;
 
-      // Move particles toward center
-      const progress = Math.min(elapsed / GATHER_DURATION, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
-
-      particles.forEach(p => {
-        p.x += (p.tx - p.x) * eased * 0.08;
-        p.y += (p.ty - p.y) * eased * 0.08;
-
-        ctx.save();
-        ctx.globalAlpha = p.alpha * (elapsed < 100 ? elapsed / 100 : 1);
-        ctx.fillStyle = p.color;
+        ctx.fillStyle = `rgba(0, 212, 200, ${n.alpha})`;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
-      });
 
-      // Trigger phase transitions
-      if (elapsed >= LOGO_SHOW_AT && phase === 'particles') setPhase('logo');
-      if (elapsed >= TEXT_SHOW_AT && phase === 'logo')      setPhase('text');
-      if (elapsed >= END_AT)                                 { setPhase('done'); return; }
+        // Connect nearby nodes
+        for (let j = i + 1; j < nodes.length; j++) {
+          const n2 = nodes[j];
+          const dist = Math.hypot(n.x - n2.x, n.y - n2.y);
+          if (dist < 120) {
+            ctx.strokeStyle = `rgba(0, 180, 166, ${0.15 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(n2.x, n2.y);
+            ctx.stroke();
+          }
+        }
+      }
 
-      animRef.current = requestAnimationFrame(render);
+      animId = requestAnimationFrame(render);
     };
 
-    animRef.current = requestAnimationFrame(render);
+    render();
 
-    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animId);
+    };
   }, []);
 
-  // When done, tell parent
   useEffect(() => {
-    if (phase === 'done') {
-      const t = setTimeout(onComplete, 400);
-      return () => clearTimeout(t);
-    }
-  }, [phase, onComplete]);
+    // ── 2. Progress Controller (0% -> 100%) ────────────────────────
+    let current = 0;
+    const duration = 2000; // 2 seconds total loading animation
+    const interval = 20; // 20ms update rate
+    const step = 100 / (duration / interval);
+
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= 100) {
+        current = 100;
+        setProgress(100);
+        clearInterval(timer);
+
+        // Start fade out sequence
+        setTimeout(() => setIsFading(true), 300);
+        setTimeout(() => onComplete(), 800);
+      } else {
+        setProgress(Math.floor(current));
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [onComplete]);
 
   return (
-    <div className={`${styles.splash} ${phase === 'done' ? styles.fadeOut : ''}`}>
+    <div className={`${styles.splashContainer} ${isFading ? styles.fadeOut : ''}`}>
       <canvas ref={canvasRef} className={styles.canvas} />
 
-      {/* Logo */}
-      <div className={`${styles.logoWrap} ${phase === 'logo' || phase === 'text' ? styles.logoVisible : ''}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/assets/logos/saampark-group-logo.jpg"
-          alt="Saampark Group"
-          className={styles.logo}
-        />
-      </div>
+      <div className={styles.centerCard}>
+        {/* Glowing Aura Ring */}
+        <div className={styles.ringWrapper}>
+          <svg className={styles.svgRing} viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="74" className={styles.ringTrack} />
+            <circle
+              cx="80"
+              cy="80"
+              r="74"
+              className={styles.ringProgress}
+              style={{
+                strokeDashoffset: 465 - (465 * progress) / 100,
+              }}
+            />
+          </svg>
 
-      {/* Text */}
-      <div className={`${styles.textWrap} ${phase === 'text' ? styles.textVisible : ''}`}>
-        <div className={styles.wordmark}>SAAMPARK GROUP</div>
-        <div className={styles.tagline}>Aspire For Optimum Excellence</div>
+          {/* Main Logo Image */}
+          <div className={styles.logoContainer}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/logos/logo-main.png"
+              alt="Saampark Group"
+              className={styles.logoImage}
+            />
+          </div>
+        </div>
+
+        {/* Brand Titles */}
+        <div className={styles.brandBox}>
+          <h1 className={styles.brandTitle}>SAAMPARK GROUP</h1>
+          <p className={styles.brandSubtitle}>Aspire For Optimum Excellence</p>
+        </div>
+
+        {/* Loading Progress Bar & Percentage */}
+        <div className={styles.progressBox}>
+          <div className={styles.progressBarTrack}>
+            <div
+              className={styles.progressBarFill}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className={styles.metaRow}>
+            <span className={styles.isoBadge}>🏆 ISO 9001:2015</span>
+            <span className={styles.percentText}>{progress}%</span>
+          </div>
+        </div>
       </div>
     </div>
   );

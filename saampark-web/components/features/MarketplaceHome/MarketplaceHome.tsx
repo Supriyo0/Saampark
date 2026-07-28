@@ -5,11 +5,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Heart, ShoppingBag, Check, Eye } from 'lucide-react';
-import { allServices } from '@/lib/data/services';
+import { allServices, type Service } from '@/lib/data/services';
 import { useCommerceStore } from '@/lib/store/cartStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import { PromoCarousel } from '../PromoCarousel/PromoCarousel';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader/SkeletonLoader';
+import { ProductQuickViewModal } from './ProductQuickViewModal';
 import styles from './MarketplaceHome.module.css';
 
 const SECTION_GROUPS = [
@@ -57,6 +58,27 @@ const SECTION_GROUPS = [
   },
 ];
 
+function ServiceThumbnail({ src, alt, className }: { src: string; alt: string; className: string }) {
+  const [imgSrc, setImgSrc] = useState(src);
+
+  useEffect(() => {
+    setImgSrc(src);
+  }, [src]);
+
+  return (
+    <Image
+      src={imgSrc}
+      alt={alt}
+      width={340}
+      height={200}
+      className={className}
+      priority
+      unoptimized
+      onError={() => setImgSrc('/assets/images/website-dev.jpg')}
+    />
+  );
+}
+
 export function MarketplaceHome() {
   return (
     <Suspense fallback={<div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--color-text-tertiary)' }}>Loading catalog...</div>}>
@@ -70,58 +92,49 @@ function MarketplaceContent() {
   const searchParams = useSearchParams();
   
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<'featured' | 'price-asc' | 'price-desc'>('featured');
+  const [entityFilter, setEntityFilter] = useState<'all' | 'str' | 'scs'>('all');
   const [loading, setLoading] = useState(false);
+  const [quickViewService, setQuickViewService] = useState<Service | null>(null);
 
   const { wishlistIds, toggleWishlist, compareIds, toggleCompare, addToCart, cart } = useCommerceStore();
   const { openCart, openCompare } = useUIStore();
 
-  // Sync search state with URL query parameters in real-time
   useEffect(() => {
     const querySearch = searchParams.get('search');
     setSearch(querySearch || '');
   }, [searchParams]);
 
-  // Trigger loading shimmer on search/sort queries
   useEffect(() => {
     setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 450);
+    const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
-  }, [search, sort]);
+  }, [search, entityFilter]);
 
   const filteredServices = useMemo(() => {
     let result = allServices;
+    
+    if (entityFilter !== 'all') {
+      result = result.filter(s => s.entity === entityFilter);
+    }
+    
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(s => s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q));
     }
     
-    // sorting
-    return [...result].sort((a, b) => {
-      if (sort === 'price-asc') {
-        const pA = a.startingPrice || 999999;
-        const pB = b.startingPrice || 999999;
-        return pA - pB;
-      }
-      if (sort === 'price-desc') {
-        const pA = a.startingPrice || -1;
-        const pB = b.startingPrice || -1;
-        return pB - pA;
-      }
-      return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
-    });
-  }, [search, sort]);
+    return [...result].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+  }, [search, entityFilter]);
 
   const getDeterministicRating = (id: string) => {
     const sum = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const rating = (4.5 + (sum % 5) * 0.1).toFixed(1);
-    const reviews = 12 + (sum % 80);
+    const rating = (4.6 + (sum % 4) * 0.1).toFixed(1);
+    const reviews = 18 + (sum % 70);
     return { rating, reviews };
   };
 
   const getOriginalPrice = (price: number | null) => {
     if (!price) return null;
-    return Math.round(price * 1.25); // 25% original price markup
+    return Math.round(price * 1.25);
   };
 
   const formatPrice = (price: number | null, type: string) => {
@@ -131,6 +144,7 @@ function MarketplaceContent() {
 
   const handleAddToCart = (e: React.MouseEvent, svc: any) => {
     e.preventDefault();
+    e.stopPropagation();
     const isInCart = cart.some(c => c.serviceId === svc.id);
     if (isInCart) {
       openCart();
@@ -150,12 +164,6 @@ function MarketplaceContent() {
     router.push('/');
   };
 
-  const handleCompareClick = (id: string) => {
-    toggleCompare(id);
-    openCompare();
-  };
-
-  // Helper to render a service card
   const renderCard = (svc: any) => {
     const isWishlisted = wishlistIds.includes(svc.id);
     const isCompared = compareIds.includes(svc.id);
@@ -165,31 +173,36 @@ function MarketplaceContent() {
 
     return (
       <div key={svc.id} className={styles.card}>
-        <Link href={svc.href} className={styles.cardLink}>
-          <div className={styles.imageWrap}>
-            <Image 
-              src={svc.image || '/assets/images/website-dev.jpg'} 
-              alt={svc.name} 
-              width={300} 
-              height={180} 
-              className={styles.thumbnail}
-            />
-            
-            <button 
-              className={`${styles.wishBtn} ${isWishlisted ? styles.wishlisted : ''}`}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(svc.id); }}
-              aria-label="Wishlist"
-            >
-              <Heart size={16} fill={isWishlisted ? 'currentColor' : 'none'} />
-            </button>
-
-            <span className={`${styles.entityBadge} ${svc.entity === 'str' ? styles.badgeStr : styles.badgeScs}`}>
-              {svc.entity.toUpperCase()}
-            </span>
-          </div>
+        <div className={styles.imageWrap}>
+          <ServiceThumbnail 
+            src={svc.image || '/assets/images/website-dev.jpg'} 
+            alt={svc.name} 
+            className={styles.thumbnail}
+          />
           
+          <button 
+            className={`${styles.wishBtn} ${isWishlisted ? styles.wishlisted : ''}`}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(svc.id); }}
+            aria-label="Wishlist"
+          >
+            <Heart size={16} fill={isWishlisted ? 'currentColor' : 'none'} />
+          </button>
+
+          <button 
+            className={styles.quickViewBtn}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewService(svc); }}
+            title="Quick View Details & 5-10 Screenshots"
+          >
+            <Eye size={14} /> Quick View
+          </button>
+
+          <span className={`${styles.entityBadge} ${svc.entity === 'str' ? styles.badgeStr : styles.badgeScs}`}>
+            {svc.entity.toUpperCase()}
+          </span>
+        </div>
+        
+        <Link href={svc.href} className={styles.cardLink}>
           <div className={styles.cardBody}>
-            {/* Star Ratings Row */}
             <div className={styles.ratingRow}>
               <span className={styles.stars}>★ {rating}</span>
               <span className={styles.reviews}>({reviews} reviews)</span>
@@ -222,11 +235,11 @@ function MarketplaceContent() {
             {isInCart ? 'In Cart' : 'Add to Cart'}
           </button>
           
-          <label className={styles.compareCheck}>
+          <label className={styles.compareCheck} onClick={(e) => e.stopPropagation()}>
             <input 
               type="checkbox" 
               checked={isCompared}
-              onChange={() => handleCompareClick(svc.id)} 
+              onChange={() => { toggleCompare(svc.id); openCompare(); }} 
             />
             <span className={styles.compareLabel}>Compare</span>
           </label>
@@ -238,32 +251,45 @@ function MarketplaceContent() {
   return (
     <div className={styles.marketplace}>
       <div className={`container ${styles.layout}`}>
-        {/* Main Content (covers full page width) */}
         <main className={styles.main}>
-          {/* Flipkart/Myntra style sliding offer banner carousel */}
           <PromoCarousel />
 
           <div className={styles.resultsHeader}>
-            <p className={styles.resultsCount}>Showing <strong>{filteredServices.length}</strong> services</p>
-            <div className={styles.sortWrapDesktop}>
-              <span className={styles.sortLabel}>Sort by:</span>
-              <select value={sort} onChange={(e) => setSort(e.target.value as any)} className={styles.sortSelect}>
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-              </select>
+            <p className={styles.resultsCount}>Showing <strong>{filteredServices.length}</strong> ISO certified services</p>
+
+            {/* Lengthy rounded-corner sliding toggle button */}
+            <div className={styles.slidingToggleContainer}>
+              <button 
+                className={`${styles.toggleSegment} ${entityFilter === 'all' ? styles.segmentActiveAll : ''}`}
+                onClick={() => setEntityFilter('all')}
+              >
+                <span className={styles.desktopText}>All Group Services</span>
+                <span className={styles.mobileText}>All Services</span>
+              </button>
+              <button 
+                className={`${styles.toggleSegment} ${entityFilter === 'str' ? styles.segmentActiveStr : ''}`}
+                onClick={() => setEntityFilter('str')}
+              >
+                <span className={styles.desktopText}>🌐 Saampark Technology</span>
+                <span className={styles.mobileText}>🌐 Tech (STR)</span>
+              </button>
+              <button 
+                className={`${styles.toggleSegment} ${entityFilter === 'scs' ? styles.segmentActiveScs : ''}`}
+                onClick={() => setEntityFilter('scs')}
+              >
+                <span className={styles.desktopText}>📢 Saampark Digital Marketing</span>
+                <span className={styles.mobileText}>📢 Marketing (SCS)</span>
+              </button>
             </div>
           </div>
 
           {loading ? (
             <SkeletonLoader count={10} />
           ) : search ? (
-            /* Search Results Flat Grid */
             <div className={styles.grid}>
               {filteredServices.map(svc => renderCard(svc))}
             </div>
           ) : (
-            /* Structured Grouped Catalog Sections */
             <div className={styles.sectionsContainer}>
               {SECTION_GROUPS.map(group => {
                 const groupServices = filteredServices.filter(svc => group.categories.includes(svc.category));
@@ -295,6 +321,14 @@ function MarketplaceContent() {
           )}
         </main>
       </div>
+
+      {/* Instant Quick View Modal with 5-10 Screenshots */}
+      {quickViewService && (
+        <ProductQuickViewModal
+          service={quickViewService}
+          onClose={() => setQuickViewService(null)}
+        />
+      )}
     </div>
   );
 }

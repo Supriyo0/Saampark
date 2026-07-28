@@ -133,7 +133,7 @@ function NavbarContent() {
           {/* Logo (Independent Floating Card) */}
           <Link href="/" className={styles.logo}>
             <Image
-              src="/assets/logos/saampark-group-logo.jpg"
+              src="/assets/logos/logo-main.png"
               alt="Saampark Group"
               width={40}
               height={40}

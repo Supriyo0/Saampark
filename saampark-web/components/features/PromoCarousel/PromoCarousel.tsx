@@ -21,51 +21,51 @@ const SLIDES: Slide[] = [
   {
     title: 'Web Engineering Special',
     highlight: 'One Page Website at ₹1,499! (Save 25%)',
-    subtitle: 'Fully responsive, modern portfolio layout. Essential SEO and social links included. Start online today!',
+    subtitle: 'Fully responsive, modern portfolio layout with essential SEO.',
     badge: '⚡ Special Offer',
     badgeIcon: Rocket,
     href: '/technology/web-development/one-page-website',
-    image: '/assets/images/website-dev.jpg',
+    image: '/assets/images/one-page-web.jpg',
     gradient: 'linear-gradient(135deg, rgba(0, 180, 166, 0.08) 0%, rgba(30, 144, 255, 0.08) 100%)',
   },
   {
     title: 'Local Ads Launch Deal',
     highlight: 'Meta & Google Ads Trial at ₹499/wk!',
-    subtitle: 'Target 1,000,000+ local customers, increase leads, and boost impressions. Weekly campaign report.',
+    subtitle: 'Target 1M+ local customers & boost business leads fast.',
     badge: '🔥 Highly Popular',
     badgeIcon: Megaphone,
     href: '/consultancy/ads-management/meta-ads',
-    image: '/assets/images/digital-marketing.jpg',
+    image: '/assets/images/meta-ads-weekly.jpg',
     gradient: 'linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(245, 166, 35, 0.08) 100%)',
   },
   {
     title: 'Creative AI Production',
-    highlight: 'Full AI Explainer Video at ₹999! (Save 33%)',
-    subtitle: 'Engaging scripts, professional AI voiceover, and full animation editing completed within 72 hours.',
+    highlight: 'Full AI Video Ad at ₹1,499!',
+    subtitle: 'AI voiceover, professional script & fast 72h delivery.',
     badge: '🤖 AI Innovation',
     badgeIcon: Sparkles,
     href: '/consultancy/video-ai/full-ai-video',
-    image: '/assets/images/ai-video.jpg',
+    image: '/assets/images/video-full-ai.jpg',
     gradient: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%)',
   },
   {
-    title: 'Business Incorporation Special',
-    highlight: 'Pvt Ltd Registration at ₹5,999!',
-    subtitle: 'All-inclusive company registration including DSC, DIN, PAN, TAN, and government fee assistance.',
+    title: 'Business Legal Special',
+    highlight: 'Pvt Ltd Registration — Complete Legal',
+    subtitle: 'DSC, DIN, MOA, AOA & MCA filing handled by experts.',
     badge: '💼 Professional Legal',
     badgeIcon: ShieldAlert,
     href: '/consultancy/business-legal/pvt-ltd-registration',
-    image: '/assets/images/business-legal.jpg',
+    image: '/assets/images/pvtltd-reg.jpg',
     gradient: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)',
   },
   {
     title: 'Mobile App Prototyping',
-    highlight: 'Interactive App Mockup at ₹19,999!',
-    subtitle: 'Complete UI/UX clickable wireframe prototypes for Android & iOS to pitch to investors or clients.',
-    badge: '📱 App Architecture',
+    highlight: 'Hybrid App (Android + iOS) Solution',
+    subtitle: 'Flutter cross-platform single codebase development.',
+    badge: '📱 Mobile App',
     badgeIcon: Smartphone,
     href: '/technology/app-development/hybrid',
-    image: '/assets/images/app-dev.jpg',
+    image: '/assets/images/hybrid-app.jpg',
     gradient: 'linear-gradient(135deg, rgba(30, 144, 255, 0.08) 0%, rgba(76, 175, 80, 0.08) 100%)',
   },
 ];
@@ -73,12 +73,22 @@ const SLIDES: Slide[] = [
 export function PromoCarousel() {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
       setCurrent(prev => (prev + 1) % SLIDES.length);
-    }, 4000);
+    }, 4500);
     return () => clearInterval(interval);
   }, [isPaused]);
 
@@ -90,6 +100,11 @@ export function PromoCarousel() {
     setCurrent(prev => (prev - 1 + SLIDES.length) % SLIDES.length);
   };
 
+  // On mobile: 100% per slide, on desktop: 75% per slide centered
+  const transformStyle = isMobile
+    ? `translateX(-${current * 100}%)`
+    : `translateX(calc(12.5% - ${current * 75}%))`;
+
   return (
     <div 
       className={styles.carousel}
@@ -97,10 +112,9 @@ export function PromoCarousel() {
       onMouseLeave={() => setIsPaused(false)}
       aria-label="Promotional Carousel"
     >
-      {/* Slides Container */}
       <div 
         className={styles.slidesTrack}
-        style={{ transform: `translateX(calc(15% - ${current * 70}%))` }}
+        style={{ transform: transformStyle }}
       >
         {SLIDES.map((slide, idx) => {
           const BadgeIcon = slide.badgeIcon;
@@ -112,34 +126,33 @@ export function PromoCarousel() {
               style={{ background: slide.gradient }}
             >
               <div className={styles.slideContent}>
-                {/* Promo Badge */}
-                <div className={styles.badge}>
-                  <BadgeIcon size={14} />
-                  <span>{slide.badge}</span>
+                <div className={styles.topMeta}>
+                  <div className={styles.badge}>
+                    <BadgeIcon size={12} />
+                    <span>{slide.badge}</span>
+                  </div>
+                  <span className={styles.title}>{slide.title}</span>
                 </div>
 
-                {/* Offer Text */}
-                <h3 className={styles.title}>{slide.title}</h3>
-                <div className={styles.highlight}>{slide.highlight}</div>
+                <h3 className={styles.highlight}>{slide.highlight}</h3>
                 <p className={styles.subtitle}>{slide.subtitle}</p>
 
-                {/* CTA Action */}
                 <div className={styles.ctaRow}>
-                  <Link href={slide.href} className="btn btn-primary btn-sm">
-                    Claim Offer Now →
+                  <Link href={slide.href} className={`btn btn-primary btn-sm ${styles.ctaBtn}`}>
+                    Claim Offer →
                   </Link>
                 </div>
               </div>
 
-              {/* Slide Mockup Image */}
               <div className={styles.imageColumn}>
                 <Image
                   src={slide.image}
                   alt={slide.title}
-                  width={320}
-                  height={200}
+                  width={200}
+                  height={130}
                   className={styles.slideImg}
                   priority
+                  unoptimized
                 />
               </div>
             </div>
@@ -147,23 +160,21 @@ export function PromoCarousel() {
         })}
       </div>
 
-      {/* Manual Arrow Controls */}
       <button 
         className={`${styles.arrowBtn} ${styles.left}`} 
         onClick={handlePrev}
         aria-label="Previous Slide"
       >
-        <ChevronLeft size={20} />
+        <ChevronLeft size={16} />
       </button>
       <button 
         className={`${styles.arrowBtn} ${styles.right}`} 
         onClick={handleNext}
         aria-label="Next Slide"
       >
-        <ChevronRight size={20} />
+        <ChevronRight size={16} />
       </button>
 
-      {/* Dot Indicators */}
       <div className={styles.dots}>
         {SLIDES.map((_, idx) => (
           <button

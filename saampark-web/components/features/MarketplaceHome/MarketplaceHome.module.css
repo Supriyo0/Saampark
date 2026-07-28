@@ -32,31 +32,117 @@
   margin-bottom: var(--size-6);
 }
 
-.resultsCount {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-}
-
-.sortWrapDesktop {
-  display: flex;
+/* ── Lengthy Rounded-Corner Sliding Button Toggle Switch ── */
+.slidingToggleContainer {
+  display: inline-flex;
   align-items: center;
-  gap: var(--size-2);
-}
-
-.sortLabel {
-  font-size: 13px;
-  color: var(--color-text-tertiary);
-}
-
-.sortSelect {
+  gap: 4px;
   background: var(--color-bg-sunken);
-  border: 1px solid var(--color-border-default);
-  padding: 6px 12px;
-  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border-default);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-xs);
+  transition: all var(--duration-fast);
+}
+
+.toggleSegment {
+  font-family: var(--font-body);
   font-size: 13px;
-  color: var(--color-text-primary);
-  outline: none;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
   cursor: pointer;
+  white-space: nowrap;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toggleSegment:hover {
+  color: var(--color-text-primary);
+}
+
+/* Active Segment 1: All Group Services */
+.segmentActiveAll {
+  background: var(--primitive-navy-900) !important;
+  color: #FFFFFF !important;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .segmentActiveAll {
+  background: var(--color-brand) !important;
+  color: var(--color-brand-on-brand) !important;
+}
+
+/* Active Segment 2: Saampark Technology (Electric Blue) */
+.segmentActiveStr {
+  background: linear-gradient(135deg, #00B4A6 0%, #1E90FF 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(0, 180, 166, 0.4) !important;
+}
+
+/* Active Segment 3: Saampark Digital Marketing (Emerald Green) */
+.segmentActiveScs {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+}
+
+.desktopText {
+  display: inline;
+}
+
+.mobileText {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .resultsHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .desktopText {
+    display: none;
+  }
+
+  .mobileText {
+    display: inline;
+  }
+
+  .slidingToggleContainer {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .slidingToggleContainer::-webkit-scrollbar {
+    display: none;
+  }
+
+  .toggleSegment {
+    flex: 1 0 auto;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    text-align: center;
+  }
 }
 
 /* ── Grid ── */
@@ -136,6 +222,41 @@
 
 .wishBtn:hover, .wishBtn.wishlisted {
   color: #EF4444;
+}
+
+.quickViewBtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  background: rgba(13, 27, 42, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: all var(--duration-fast) var(--ease-standard);
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+}
+
+.card:hover .quickViewBtn {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+.quickViewBtn:hover {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  transform: translate(-50%, -50%) scale(1.05);
 }
 
 .entityBadge {

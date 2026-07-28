@@ -15,7 +15,7 @@ export function Footer() {
             <div className={styles.brandCol}>
               <Link href="/" className={styles.brandLogo}>
                 <Image
-                  src="/assets/logos/saampark-group-logo.jpg"
+                  src="/assets/logos/logo-main.png"
                   alt="Saampark Group"
                   width={48}
                   height={48}

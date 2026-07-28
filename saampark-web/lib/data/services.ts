@@ -777,45 +777,46 @@ export const scsServices: Service[] = [
 // ─────────────────────────────────────────
 // ALL SERVICES COMBINED (with dynamically injected images)
 // ─────────────────────────────────────────
+const SERVICE_IMAGE_MAP: Record<string, string> = {
+  'str-web-onepage':     '/assets/images/one-page-web.jpg',
+  'str-web-static':      '/assets/images/static-web.jpg',
+  'str-web-dynamic':     '/assets/images/dynamic-web.jpg',
+  'str-web-ecommerce':   '/assets/images/ecommerce-web.jpg',
+  'str-app-android':     '/assets/images/android-app.jpg',
+  'str-app-ios':         '/assets/images/ios-app.jpg',
+  'str-app-hybrid':      '/assets/images/hybrid-app.jpg',
+  'str-spec-hotel':      '/assets/images/hotel-system.jpg',
+  'str-spec-hospital':   '/assets/images/hospital-system.jpg',
+  'str-spec-school':     '/assets/images/school-system.jpg',
+  'str-spec-elearning':  '/assets/images/elearning-platform.jpg',
+  'str-spec-realestate': '/assets/images/realestate-web.jpg',
+  'str-spec-restaurant': '/assets/images/restaurant-system.jpg',
+  'str-spec-erp':        '/assets/images/erp-software.jpg',
+  'str-spec-crm':        '/assets/images/crm-software.jpg',
+  'scs-social-standard': '/assets/images/social-media.jpg',
+  'scs-meta-weekly':     '/assets/images/meta-ads-weekly.jpg',
+  'scs-meta-monthly':    '/assets/images/meta-ads-monthly.jpg',
+  'scs-meta-premium':    '/assets/images/meta-ads-premium.jpg',
+  'scs-google-weekly':   '/assets/images/google-ads-weekly.jpg',
+  'scs-google-monthly':  '/assets/images/google-ads-monthly.jpg',
+  'scs-google-premium':  '/assets/images/google-ads-premium.jpg',
+  'scs-gbp-basic':       '/assets/images/gbp-basic.jpg',
+  'scs-gbp-regular':     '/assets/images/gbp-regular.jpg',
+  'scs-gbp-advanced':    '/assets/images/gbp-advanced.jpg',
+  'scs-video-simple':    '/assets/images/video-simple.jpg',
+  'scs-video-poster':    '/assets/images/video-poster.jpg',
+  'scs-video-cartoon':   '/assets/images/video-cartoon.jpg',
+  'scs-video-motion-ai': '/assets/images/video-motion-ai.jpg',
+  'scs-video-full-ai':   '/assets/images/video-full-ai.jpg',
+  'scs-video-4k':        '/assets/images/video-4k-ai.jpg',
+  'scs-legal-pvtltd':    '/assets/images/pvtltd-reg.jpg',
+  'scs-legal-gst':       '/assets/images/gst-reg.jpg',
+  'scs-legal-msme':      '/assets/images/msme-reg.jpg',
+  'scs-legal-itr':       '/assets/images/itr-filing.jpg',
+};
+
 export const allServices: Service[] = [...strServices, ...scsServices].map(s => {
-  let image = '/assets/images/website-dev.jpg'; // default website
-  
-  if (s.id === 'str-web-onepage') {
-    image = '/assets/images/one-page-web.png';
-  } else if (s.id === 'str-web-static') {
-    image = '/assets/images/static-web.png';
-  } else if (s.id === 'str-web-dynamic') {
-    image = '/assets/images/dynamic-web.png';
-  } else if (s.id === 'str-web-ecommerce') {
-    image = '/assets/images/ecommerce-web.png';
-  } else if (s.id === 'str-app-android') {
-    image = '/assets/images/android-app.png';
-  } else if (s.id === 'str-app-ios' || s.id === 'str-app-hybrid') {
-    image = '/assets/images/ios-app.png';
-  } else if (s.id === 'str-spec-erp' || s.id === 'str-spec-crm' || s.id === 'str-spec-school' || s.id === 'str-spec-hotel' || s.id === 'str-spec-hospital') {
-    image = '/assets/images/erp-software.png';
-  } else if (s.id.startsWith('scs-meta-')) {
-    image = '/assets/images/meta-ads.png';
-  } else if (s.id.startsWith('scs-google-')) {
-    image = '/assets/images/google-ads.png';
-  } else if (s.id === 'scs-legal-gst') {
-    image = '/assets/images/gst-reg.png';
-  } else {
-    // Fallbacks
-    if (s.category === 'app') {
-      image = '/assets/images/app-dev.jpg';
-    } else if (s.category === 'software') {
-      image = '/assets/images/software-erp.jpg';
-    } else if (s.category === 'specialized-website') {
-      image = '/assets/images/specialized-web.jpg';
-    } else if (['social-media', 'google-business'].includes(s.category)) {
-      image = '/assets/images/digital-marketing.jpg';
-    } else if (s.category === 'video-ai') {
-      image = '/assets/images/ai-video.jpg';
-    } else if (s.category === 'business-legal') {
-      image = '/assets/images/business-legal.jpg';
-    }
-  }
+  const image = SERVICE_IMAGE_MAP[s.id] || '/assets/images/website-dev.jpg';
   return { ...s, image };
 });
 
